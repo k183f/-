@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片转二维码</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:微软雅黑}
+        body{padding:30px 20px;background:#f5f7fa}
+        .container{max-width:500px;margin:0 auto;background:#fff;padding:25px;border-radius:12px;box-shadow:0 0 10px #eee}
+        h2{text-align:center;margin-bottom:20px;color:#333}
+        .item{margin-bottom:20px}
+        label{display:block;margin-bottom:8px;color:#555}
+        button{width:100%;padding:12px;background:#007bff;color:white;border:none;border-radius:6px;font-size:16px;cursor:pointer}
+        button:hover{background:#0069d9}
+        #preview{max-width:100%;max-height:300px;margin:10px 0;border-radius:8px}
+        #qrcode{margin-top:20px;text-align:center}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>上传图片生成二维码</h2>
+
+        <div class="item">
+            <label>1. 上传图片</label>
+            <input type="file" id="fileInput" accept="image/*">
+            <img id="preview" style="display:none">
+        </div>
+
+        <button onclick="createQr()">2. 生成二维码</button>
+        <div id="qrcode"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const qrcodeBox = document.getElementById('qrcode');
+        let imgData = '';
+
+        // 图片预览
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                imgData = reader.result;
+                preview.src = imgData;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // 生成二维码 → 扫码直接全屏看图
+        function createQr() {
+            if (!imgData) { alert('请先上传图片！'); return; }
+            qrcodeBox.innerHTML = '';
+
+            // 核心：生成纯图片全屏地址，扫码只看图片！
+            const blob = new Blob([atob(imgData.split(',')[1])], { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
+
+            QRCode.toCanvas(qrcodeBox, url, {
+                width: 320,
+                margin: 1,
+                errorCorrectionLevel: 'H'
+            });
+        }
+    </script>
+</body>
+</html>
